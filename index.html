@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Beat Register — Project Ganga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF0EA;
+    --paper:#FFFFFF;
+    --ink:#1B2430;
+    --ink-soft:#5B6472;
+    --line:#D9DCD1;
+    --indigo:#24406B;
+    --indigo-soft:#EAF0F7;
+    --marigold:#E2A33B;
+    --marigold-soft:#FBF1DE;
+    --green:#3C7A5B;
+    --green-soft:#E7F1EB;
+    --rust:#B5533C;
+    --rust-soft:#F7E9E4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 18px 80px;}
+  header.top{
+    padding:28px 0 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand svg{flex-shrink:0;}
+  .brand h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .brand p{margin:2px 0 0;font-size:13px;color:var(--ink-soft);}
+  .user-chip{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:6px 6px 6px 14px;
+    border-radius:99px;
+    font-size:14px;
+  }
+  .user-chip button{
+    border:none;background:var(--indigo);color:#fff;
+    padding:6px 12px;border-radius:99px;font-size:12.5px;
+    cursor:pointer;font-family:inherit;
+  }
+  nav.tabs{
+    display:flex;gap:2px;margin:22px 0 20px;
+    border-bottom:1px solid var(--line);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  nav.tabs::-webkit-scrollbar{display:none;}
+  nav.tabs button{
+    background:none;border:none;font-family:inherit;font-size:14.5px;
+    padding:10px 14px 12px;cursor:pointer;color:var(--ink-soft);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+    white-space:nowrap;flex-shrink:0;
+  }
+  nav.tabs button.active{color:var(--indigo);border-bottom-color:var(--indigo);font-weight:500;}
+
+  .stat-strip{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+  .stat{
+    flex:1;min-width:120px;background:var(--paper);border:1px solid var(--line);
+    padding:12px 14px;border-radius:6px;
+  }
+  .stat .n{font-family:'Fraunces',serif;font-size:24px;font-weight:600;}
+  .stat .l{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+  .card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-left:4px solid var(--line);
+    border-radius:4px;
+    padding:14px 16px;
+    margin-bottom:12px;
+  }
+  .card.planned{border-left-color:var(--marigold);}
+  .card.visited{border-left-color:var(--green);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .card-top h3{margin:0 0 3px;font-size:16px;font-weight:600;}
+  .card-top .sub{font-size:12.5px;color:var(--ink-soft);}
+  .badge{
+    font-size:11.5px;padding:3px 9px;border-radius:99px;white-space:nowrap;
+  }
+  .badge.planned{background:var(--marigold-soft);color:#8a6117;}
+  .badge.visited{background:var(--green-soft);color:var(--green);}
+
+  .visit-summary{margin-top:10px;font-size:13.5px;line-height:1.6;}
+  .visit-summary .k{color:var(--ink-soft);}
+  .visit-summary .app-id{font-family:'IBM Plex Mono', monospace;background:var(--indigo-soft);padding:1px 6px;border-radius:3px;}
+
+  button.link-btn{
+    background:none;border:1px solid var(--indigo);color:var(--indigo);
+    font-family:inherit;font-size:13px;padding:6px 13px;border-radius:5px;
+    cursor:pointer;margin-top:10px;
+  }
+  button.link-btn:hover{background:var(--indigo-soft);}
+
+  .visit-form{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%;font-family:inherit;font-size:14.5px;padding:9px 10px;
+    border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);
+  }
+  .field input.mono{font-family:'IBM Plex Mono', monospace;}
+  .field textarea{resize:vertical;min-height:56px;}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+
+  .btn-primary{
+    background:var(--indigo);color:#fff;border:none;
+    font-family:inherit;font-size:14px;padding:10px 18px;border-radius:5px;
+    cursor:pointer;
+  }
+  .btn-primary:disabled{opacity:0.5;cursor:default;}
+  .btn-ghost{
+    background:none;border:1px solid var(--line);color:var(--ink-soft);
+    font-family:inherit;font-size:13.5px;padding:9px 16px;border-radius:5px;cursor:pointer;
+  }
+
+  .empty{
+    text-align:center;padding:36px 20px;color:var(--ink-soft);font-size:14px;
+    border:1px dashed var(--line);border-radius:6px;
+  }
+
+  .picker{padding:60px 0;}
+  .picker h2{font-family:'Fraunces',serif;font-size:22px;margin-bottom:4px;}
+  .picker p{color:var(--ink-soft);font-size:14px;margin-bottom:22px;}
+  .kam-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;}
+  .kam-grid button{
+    background:var(--paper);border:1px solid var(--line);padding:10px 16px;
+    border-radius:6px;font-family:inherit;font-size:14px;cursor:pointer;
+  }
+  .kam-grid button:hover{border-color:var(--indigo);color:var(--indigo);}
+  .add-teammate{display:flex;gap:8px;max-width:360px;}
+
+  .day-group{margin-bottom:18px;}
+  .day-group h4{
+    font-family:'Fraunces',serif;font-size:15px;font-weight:600;
+    margin:0 0 8px;color:var(--indigo);
+  }
+  table.team-table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;}
+  table.team-table th, table.team-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  table.team-table th{color:var(--ink-soft);font-weight:500;font-size:12px;}
+  table.team-table tr:last-child td{border-bottom:none;}
+
+  .entity-counts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .entity-counts span{
+    background:var(--indigo-soft);color:var(--indigo);font-size:12.5px;
+    padding:5px 11px;border-radius:99px;
+  }
+
+  .loading, .error-banner{padding:14px;border-radius:6px;font-size:13.5px;margin-bottom:14px;}
+  .loading{color:var(--ink-soft);}
+  .error-banner{background:var(--rust-soft);color:var(--rust);}
+
+  select.district-select{margin-bottom:6px;}
+
+  .filter-bar{
+    display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;
+  }
+  .filter-bar .field{margin-bottom:0;min-width:150px;}
+  .filter-bar .field.grow{flex:1;}
+  table.team-table tr.totals td{
+    font-weight:600;background:var(--indigo-soft);color:var(--indigo);
+  }
+  table.team-table td.num, table.team-table th.num{text-align:right;}
+  .report-actions{display:flex;justify-content:flex-end;margin-bottom:10px;}
+  .day-count-table{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--paper);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-top:18px;}
+  .day-count-table th, .day-count-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);}
+  .day-count-table th{color:var(--ink-soft);font-weight:500;font-size:12px;}
+  .day-count-table td.num{text-align:right;font-family:'IBM Plex Mono',monospace;}
+  .day-count-table tr:last-child td{border-bottom:none;}
+  .big-count{
+    text-align:center;padding:22px 0 26px;
+  }
+  .big-count .n{font-family:'Fraunces',serif;font-size:44px;font-weight:600;color:var(--indigo);line-height:1;}
+  .big-count .l{color:var(--ink-soft);font-size:13.5px;margin-top:6px;}
+
+  .geo-box{
+    border:1px solid var(--line);border-radius:5px;padding:10px 12px;margin-bottom:12px;
+    font-size:13px;background:#FBFBF9;
+  }
+  .geo-box .geo-status{color:var(--ink-soft);}
+  .geo-box .coords{font-family:'IBM Plex Mono',monospace;font-size:12.5px;margin-top:4px;}
+  .badge.onsite{background:var(--green-soft);color:var(--green);}
+  .badge.offsite{background:var(--rust-soft);color:var(--rust);}
+  .badge.nogeo{background:#EDEEE9;color:var(--ink-soft);}
+  .coord-row{display:flex;gap:8px;}
+  .coord-row .field{flex:1;}
+
+  @media (max-width: 480px){
+    .wrap{padding:0 14px 60px;}
+    header.top{padding:20px 0 14px;}
+    .brand h1{font-size:22px;}
+    .row2{flex-direction:column;gap:0;}
+    .coord-row{flex-direction:column;gap:0;}
+    .stat-strip{gap:8px;}
+    .stat{min-width:100%;}
+    nav.tabs button{padding:11px 13px 12px;font-size:14px;}
+    .btn-primary, .btn-ghost, button.link-btn{padding:12px 16px;font-size:15px;}
+    .field input, .field select, .field textarea{font-size:16px;} /* prevents iOS auto-zoom on focus */
+    table.team-table, .day-count-table{font-size:12.5px;}
+  }
+</style>
+</head>
+<body>
+<div id="root" class="wrap"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// ============================================================
+// STEP A — paste your Firebase config here (see FIREBASE_SETUP.md)
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDhSCj07tsCjQM1GbJT5Dw3c3wIQ5c-ro0",
+  authDomain: "beat-register-ganga.firebaseapp.com",
+  projectId: "beat-register-ganga",
+  storageBucket: "beat-register-ganga.firebasestorage.app",
+  messagingSenderId: "884839416699",
+  appId: "1:884839416699:web:226ec7f410618c0a2af3de"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const auth = getAuth(fbApp);
+
+const KAM_DISTRICTS = {
+  "Vivek Sharma": ["Agra","Firozabad","Mathura"],
+  "Ankit Sharma": ["Aligarh","Hathras","Kasganj"],
+  "Ankur Tyagi": ["Amroha","Moradabad","Sambhal"],
+  "Ranjeet Kumar Yadav": ["Auraiya","Etawah","Kannauj"],
+  "Anshul Chaudhary": ["Baghpat","Meerut"],
+  "Nitish Mishra": ["Bareilly","Budaun","Shahjahanpur"],
+  "Manoj Kumar Sharma": ["Gautam Buddha Nagar","Ghaziabad"],
+  "Narendra Namdev": ["Jalaun","Jhansi","Lalitpur"],
+  "Nitin Yadav": ["Kanpur Dehat","Kanpur Nagar"],
+  "Siddhi Nath Tiwari": ["Muzaffarnagar","Saharanpur","Shamli"]
+};
+const DEFAULT_TEAM = Object.keys(KAM_DISTRICTS);
+const ENTITY_OPTIONS = ["Digital Service Provider","Gram Sachiv","CDO","DIC","Bank"];
+
+const root = document.getElementById('root');
+let state = {
+  loading: true,
+  error: null,
+  currentUser: null,
+  role: 'kam',
+  team: [],
+  beatPlan: [],
+  visitLog: [],
+  tab: 'today',
+  openFormId: null,
+  editVisitId: null,
+  addingTeammate: false
+};
+
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short' });
+}
+function fmtTime(ts){
+  return new Date(ts).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+
+const OFF_SITE_THRESHOLD_M = 500;
+
+function haversineMeters(lat1, lon1, lat2, lon2){
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function fmtDistance(m){
+  if(m == null) return '—';
+  return m < 1000 ? `${Math.round(m)} m` : `${(m/1000).toFixed(1)} km`;
+}
+function locationBadgeHtml(v){
+  if(v.locationStatus === 'onsite') return `<span class="badge onsite">${fmtDistance(v.distanceMeters)} from planned stop</span>`;
+  if(v.locationStatus === 'offsite') return `<span class="badge offsite">${fmtDistance(v.distanceMeters)} from planned stop — check</span>`;
+  if(v.locationStatus === 'no_target') return `<span class="badge nogeo">GPS captured, no target set for this stop</span>`;
+  return `<span class="badge nogeo">No GPS captured</span>`;
+}
+function getCurrentPosition(){
+  return new Promise((resolve, reject)=>{
+    if(!navigator.geolocation){ reject(new Error('Geolocation not supported on this device')); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      err => reject(err),
+      { enableHighAccuracy:true, timeout:12000, maximumAge:0 }
+    );
+  });
+}
+
+// shared:true  -> stored in Firestore, synced across the whole team
+// shared:false -> stored in localStorage, this device only (e.g. "who am I")
+async function safeGet(key, shared){
+  try{
+    if(!shared){
+      const v = localStorage.getItem('br_' + key);
+      return v ? JSON.parse(v) : null;
+    }
+    const snap = await getDoc(doc(db, 'beatRegister', key));
+    return snap.exists() ? snap.data().value : null;
+  }catch(e){ console.error('safeGet failed:', key, e); return null; }
+}
+async function safeSet(key, value, shared){
+  try{
+    if(!shared){
+      localStorage.setItem('br_' + key, JSON.stringify(value));
+      return true;
+    }
+    await setDoc(doc(db, 'beatRegister', key), { value });
+    return true;
+  }catch(e){ console.error('safeSet failed:', key, e); return false; }
+}
+
+// Real per-person identity: each KAM logs in with an email+password
+// account YOU create for them in the Firebase console (see FIREBASE_SETUP.md).
+// The app never lets someone pick a name off a list — the name comes from
+// their authenticated account, captured once on first login.
+
+async function getUserDoc(uid){
+  try{
+    const snap = await getDoc(doc(db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  }catch(e){ console.error('getUserDoc failed:', e); return null; }
+}
+async function saveUserName(uid, name){
+  try{ await setDoc(doc(db, 'users', uid), { name }, { merge: true }); return true; }
+  catch(e){ console.error('saveUserName failed:', e); return false; }
+}
+
+function init(){
+  onAuthStateChanged(auth, async (user)=>{
+    if(!user){
+      state.loading = false;
+      state.currentUser = null;
+      renderLoginGate();
+      return;
+    }
+    await loadAppData(user);
+  });
+}
+
+async function loadAppData(user){
+  const [team, beatPlan, visitLog, userDoc] = await Promise.all([
+    safeGet('team-members', true),
+    safeGet('beat-plan', true),
+    safeGet('visit-log', true),
+    getUserDoc(user.uid)
+  ]);
+  state.team = team || DEFAULT_TEAM;
+  if(!team){ await safeSet('team-members', state.team, true); }
+  state.beatPlan = beatPlan || [];
+  state.visitLog = visitLog || [];
+  state.uid = user.uid;
+
+  if(userDoc && userDoc.name){
+    state.currentUser = userDoc.name;
+    state.role = userDoc.role === 'admin' ? 'admin' : 'kam';
+    if((state.tab === 'admin' || state.tab === 'team') && state.role !== 'admin'){ state.tab = 'today'; }
+    if(!state.team.includes(state.currentUser)){
+      state.team.push(state.currentUser);
+      await persistTeam();
+    }
+    state.loading = false;
+    render();
+  } else {
+    state.loading = false;
+    renderNamePrompt(user.uid);
+  }
+}
+
+function renderLoginGate(){
+  root.innerHTML = '';
+  const wrap = el(`
+    <div class="picker">
+      <h2>Beat Register</h2>
+      <p>Log in with the account your admin created for you.</p>
+      <div class="field" style="max-width:320px;">
+        <label>Email</label>
+        <input type="email" id="li_email" placeholder="you@example.com" style="font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;width:100%;">
+      </div>
+      <div class="field" style="max-width:320px;">
+        <label>Password</label>
+        <input type="password" id="li_pass" placeholder="Password" style="font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;width:100%;">
+      </div>
+      <div id="li_err" style="color:var(--rust);font-size:13px;margin-bottom:10px;"></div>
+      <button class="btn-primary" id="li_submit">Log in</button>
+      <button class="link-btn" id="li_forgot" style="margin-left:8px;">Forgot password?</button>
+    </div>
+  `);
+  const submit = async ()=>{
+    const email = wrap.querySelector('#li_email').value.trim();
+    const pass = wrap.querySelector('#li_pass').value;
+    const err = wrap.querySelector('#li_err');
+    const btn = wrap.querySelector('#li_submit');
+    err.textContent = '';
+    if(!email || !pass){ err.textContent = 'Enter email and password.'; return; }
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    try{
+      await signInWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged will pick this up and load the app
+    }catch(e){
+      btn.disabled = false; btn.textContent = 'Log in';
+      err.textContent = "Couldn't log in — check your email and password, or ask your admin.";
+    }
+  };
+  wrap.querySelector('#li_submit').onclick = submit;
+  wrap.querySelector('#li_pass').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  wrap.querySelector('#li_forgot').onclick = async ()=>{
+    const email = wrap.querySelector('#li_email').value.trim();
+    const err = wrap.querySelector('#li_err');
+    if(!email){ err.textContent = 'Enter your email above first, then tap "Forgot password?" again.'; return; }
+    try{ await sendPasswordResetEmail(auth, email); err.style.color = 'var(--green)'; err.textContent = 'Reset email sent — check your inbox.'; }
+    catch(e){ err.textContent = "Couldn't send reset email — check the address or ask your admin."; }
+  };
+  root.appendChild(wrap);
+}
+
+function renderNamePrompt(uid){
+  root.innerHTML = '';
+  const wrap = el(`
+    <div class="picker">
+      <h2>What's your name?</h2>
+      <p>One-time step — we'll remember you on future logins from any device.</p>
+      <div class="field" style="max-width:320px;">
+        <input type="text" id="np_name" placeholder="Full name, e.g. Vivek Sharma" style="font-family:inherit;font-size:14px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;width:100%;">
+      </div>
+      <button class="btn-primary" id="np_submit">Continue</button>
+    </div>
+  `);
+  wrap.querySelector('#np_submit').onclick = async ()=>{
+    const name = wrap.querySelector('#np_name').value.trim();
+    if(!name) return;
+    const btn = wrap.querySelector('#np_submit');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    await saveUserName(uid, name);
+    const user = auth.currentUser;
+    await loadAppData(user);
+  };
+  root.appendChild(wrap);
+}
+
+async function persistBeatPlan(){ await safeSet('beat-plan', state.beatPlan, true); }
+async function persistVisitLog(){ await safeSet('visit-log', state.visitLog, true); }
+async function persistTeam(){ await safeSet('team-members', state.team, true); }
+
+async function switchUser(){
+  state.loading = true;
+  render();
+  await signOut(auth);
+  // onAuthStateChanged fires and shows the login gate
+}
+
+function el(html){
+  const t = document.createElement('template');
+  t.innerHTML = html.trim();
+  return t.content.firstChild;
+}
+
+function render(){
+  root.innerHTML = '';
+  if(state.loading){
+    root.appendChild(el(`<div class="loading" style="padding-top:60px;">Loading beat register…</div>`));
+    return;
+  }
+  if(!state.currentUser){
+    // Should not normally happen — login/name-capture bypass render()
+    // directly. Fall back safely instead of calling a removed function.
+    renderLoginGate();
+    return;
+  }
+  root.appendChild(renderHeader());
+  root.appendChild(renderTabs());
+  const content = document.createElement('div');
+  if(state.tab === 'today') content.appendChild(renderToday());
+  else if(state.tab === 'plan') content.appendChild(renderPlanAhead());
+  else if(state.tab === 'appids') content.appendChild(renderAppIds());
+  else if(state.tab === 'mine') content.appendChild(renderMyVisits());
+  else if(state.tab === 'team' && state.role === 'admin') content.appendChild(renderTeamLog());
+  else if(state.tab === 'admin' && state.role === 'admin') content.appendChild(renderAdminReport());
+  root.appendChild(content);
+}
+
+// NOTE: the old "click your name from a list" picker and self-serve
+// "add a teammate" flow have been removed. Identity now comes from
+// Firebase Auth login (see renderLoginGate / renderNamePrompt above) —
+// re-adding a click-to-pick-anyone flow would undo the whole point of
+// adding real login.
+
+function renderHeader(){
+  const node = el(`
+    <header class="top">
+      <div class="brand">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C7.5 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.5-8-8-8Z" stroke="#24406B" stroke-width="1.6"/>
+          <circle cx="12" cy="10" r="2.6" stroke="#24406B" stroke-width="1.6"/>
+        </svg>
+        <div>
+          <h1>Beat Register</h1>
+          <p>Project Ganga — field visit tracker</p>
+        </div>
+      </div>
+      <div class="user-chip">
+        <span>${state.currentUser}</span>
+        <button id="switchUserBtn">Switch</button>
+      </div>
+    </header>
+  `);
+  node.querySelector('#switchUserBtn').onclick = switchUser;
+  return node;
+}
+
+function renderTabs(){
+  const tabs = [
+    {id:'today', label:"Today's beat"},
+    {id:'plan', label:'Plan ahead'},
+    {id:'appids', label:'App IDs'},
+    {id:'mine', label:'My visits'}
+  ];
+  if(state.role === 'admin'){
+    tabs.push({id:'team', label:'Team log'});
+    tabs.push({id:'admin', label:'Admin report'});
+  }
+  const nav = el(`<nav class="tabs"></nav>`);
+  tabs.forEach(t=>{
+    const b = el(`<button class="${state.tab===t.id?'active':''}">${t.label}</button>`);
+    b.onclick = ()=>{ state.tab = t.id; state.openFormId = null; render(); };
+    nav.appendChild(b);
+  });
+  return nav;
+}
+
+function renderToday(){
+  const wrap = document.createDocumentFragment();
+  const today = todayStr();
+  const mine = state.beatPlan.filter(b=> b.kam === state.currentUser && b.date === today);
+  const visitedToday = state.visitLog.filter(v=> v.kam === state.currentUser && v.date === today);
+  const withAppId = visitedToday.filter(v=> v.applicationId && v.applicationId.trim());
+
+  const strip = el(`
+    <div class="stat-strip">
+      <div class="stat"><div class="n">${mine.length}</div><div class="l">Stops planned today</div></div>
+      <div class="stat"><div class="n">${visitedToday.length}</div><div class="l">Visits logged</div></div>
+      <div class="stat"><div class="n">${withAppId.length}</div><div class="l">Application IDs filled</div></div>
+    </div>
+  `);
+  wrap.appendChild(strip);
+
+  if(mine.length === 0){
+    wrap.appendChild(el(`<div class="empty">No stops planned for today yet. Add some under "Plan ahead".</div>`));
+    return wrap;
+  }
+
+  mine.sort((a,b)=> (a.status==='visited') - (b.status==='visited'));
+  mine.forEach(item=> wrap.appendChild(renderBeatCard(item)));
+  return wrap;
+}
+
+function renderBeatCard(item){
+  const visited = item.status === 'visited';
+  const card = el(`<div class="card ${visited?'visited':'planned'}"></div>`);
+  const top = el(`
+    <div class="card-top">
+      <div>
+        <h3>${item.district}${item.block ? ' — ' + item.block : ''}</h3>
+        <div class="sub">${item.location || 'No specific location noted'} · ${fmtDate(item.date)}</div>
+      </div>
+      <span class="badge ${visited?'visited':'planned'}">${visited?'Visited':'Planned'}</span>
+    </div>
+  `);
+  card.appendChild(top);
+
+  if(visited){
+    const v = state.visitLog.find(x=> x.id === item.visitId);
+    if(v){
+      card.appendChild(el(`
+        <div class="visit-summary">
+          <span class="k">Met:</span> ${v.entityMet} &nbsp;·&nbsp;
+          <span class="k">Application ID:</span> <span class="app-id">${v.applicationId || '—'}</span> &nbsp;·&nbsp;
+          <span class="k">at</span> ${fmtTime(v.timestamp)}
+          <div style="margin-top:6px;">${locationBadgeHtml(v)}</div>
+          ${v.address ? `<div style="margin-top:4px;color:var(--ink-soft);">${v.address}</div>` : ''}
+          ${v.notes ? `<div style="margin-top:4px;color:var(--ink-soft);">${v.notes}</div>` : ''}
+        </div>
+      `));
+    }
+  } else {
+    if(state.openFormId === item.id){
+      card.appendChild(renderVisitForm(item));
+    } else {
+      const btn = el(`<button class="link-btn">Mark visit</button>`);
+      btn.onclick = ()=>{ state.openFormId = item.id; render(); };
+      card.appendChild(btn);
+    }
+  }
+  return card;
+}
+
+function renderVisitForm(item){
+  const capturedGeo = { lat:null, lng:null };
+  const form = el(`
+    <div class="visit-form">
+      <div class="field">
+        <label>Application ID</label>
+        <input type="text" class="mono" id="f_appId" placeholder="e.g. APP-2026-00341">
+      </div>
+      <div class="field">
+        <label>Meeting held with</label>
+        <select id="f_entity">
+          ${ENTITY_OPTIONS.map(o=>`<option value="${o}">${o}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Address of the visit</label>
+        <input type="text" id="f_address" placeholder="Street / landmark where the meeting happened" value="${item.address || ''}">
+      </div>
+      <div class="field">
+        <label>Your location</label>
+        <div class="geo-box">
+          <div class="geo-status" id="f_geo_status">
+            ${item.targetLat != null ? 'Capture your GPS location to check it against the planned stop.' : 'Capture your GPS location for the record.'}
+          </div>
+          <div class="coords" id="f_geo_coords"></div>
+        </div>
+        <button type="button" class="btn-ghost" id="f_capture_gps">Capture GPS location</button>
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <textarea id="f_notes" placeholder="Any follow-up needed, contact met, etc."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-primary" id="f_submit">Save visit</button>
+        <button class="btn-ghost" id="f_cancel">Cancel</button>
+      </div>
+    </div>
+  `);
+
+  form.querySelector('#f_capture_gps').onclick = async ()=>{
+    const status = form.querySelector('#f_geo_status');
+    const coordsEl = form.querySelector('#f_geo_coords');
+    status.textContent = 'Locating…';
+    try{
+      const pos = await getCurrentPosition();
+      capturedGeo.lat = pos.lat;
+      capturedGeo.lng = pos.lng;
+      coordsEl.textContent = `${pos.lat.toFixed(6)}, ${pos.lng.toFixed(6)}`;
+      if(item.targetLat != null && item.targetLng != null){
+        const dist = haversineMeters(pos.lat, pos.lng, item.targetLat, item.targetLng);
+        const onsite = dist <= OFF_SITE_THRESHOLD_M;
+        status.innerHTML = `<span class="badge ${onsite?'onsite':'offsite'}">${fmtDistance(dist)} from planned stop${onsite? '' : ' — check this'}</span>`;
+      } else {
+        status.textContent = 'Location captured. No target coordinates were set for this stop, so distance can\'t be checked.';
+      }
+    }catch(e){
+      status.textContent = "Couldn't get your location — check location permissions and try again.";
+    }
+  };
+
+  form.querySelector('#f_cancel').onclick = ()=>{ state.openFormId = null; render(); };
+  form.querySelector('#f_submit').onclick = async ()=>{
+    const appId = form.querySelector('#f_appId').value.trim();
+    const entity = form.querySelector('#f_entity').value;
+    const address = form.querySelector('#f_address').value.trim();
+    const notes = form.querySelector('#f_notes').value.trim();
+    const submitBtn = form.querySelector('#f_submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+
+    let distanceMeters = null;
+    let locationStatus = 'not_captured';
+    if(capturedGeo.lat != null){
+      if(item.targetLat != null && item.targetLng != null){
+        distanceMeters = haversineMeters(capturedGeo.lat, capturedGeo.lng, item.targetLat, item.targetLng);
+        locationStatus = distanceMeters <= OFF_SITE_THRESHOLD_M ? 'onsite' : 'offsite';
+      } else {
+        locationStatus = 'no_target';
+      }
+    }
+
+    const visitId = uid();
+    const visit = {
+      id: visitId,
+      kam: state.currentUser,
+      date: item.date,
+      timestamp: Date.now(),
+      district: item.district,
+      block: item.block || '',
+      location: item.location || '',
+      address: address,
+      applicationId: appId,
+      entityMet: entity,
+      notes: notes,
+      visitLat: capturedGeo.lat,
+      visitLng: capturedGeo.lng,
+      distanceMeters: distanceMeters,
+      locationStatus: locationStatus
+    };
+    state.visitLog.push(visit);
+    item.status = 'visited';
+    item.visitId = visitId;
+
+    const ok1 = await persistVisitLog();
+    const ok2 = await persistBeatPlan();
+    state.openFormId = null;
+    if(!ok1 || !ok2){
+      state.error = "Couldn't save to the shared log — please retry.";
+    }
+    render();
+  };
+  return form;
+}
+
+function renderPlanAhead(){
+  const wrap = document.createDocumentFragment();
+  if(state.error){
+    wrap.appendChild(el(`<div class="error-banner">${state.error}</div>`));
+  }
+  const myDistricts = KAM_DISTRICTS[state.currentUser] || [];
+  const form = el(`
+    <div class="card" style="border-left-color:var(--indigo);">
+      <h3 style="margin:0 0 10px;">Add a beat plan stop</h3>
+      <div class="row2">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="p_date" value="${todayStr()}">
+        </div>
+        <div class="field">
+          <label>District</label>
+          ${myDistricts.length ? `
+            <select class="district-select" id="p_district_select">
+              ${myDistricts.map(d=>`<option value="${d}">${d}</option>`).join('')}
+              <option value="__other">Other…</option>
+            </select>
+          ` : ''}
+          <input type="text" id="p_district" placeholder="District name" ${myDistricts.length? 'style="display:none;"':''}>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Block (optional)</label>
+          <input type="text" id="p_block" placeholder="e.g. Etmadpur">
+        </div>
+        <div class="field">
+          <label>Location / office</label>
+          <input type="text" id="p_location" placeholder="e.g. Block office, CSC, Bank branch">
+        </div>
+      </div>
+      <div class="field">
+        <label>Address (optional)</label>
+        <input type="text" id="p_address" placeholder="Street / landmark for this stop">
+      </div>
+      <div class="field">
+        <label>Target coordinates (optional — lets the visit form check the rep actually reached this stop)</label>
+        <div class="coord-row">
+          <div class="field"><input type="text" id="p_lat" class="mono" placeholder="Latitude"></div>
+          <div class="field"><input type="text" id="p_lng" class="mono" placeholder="Longitude"></div>
+        </div>
+        <button type="button" class="btn-ghost" id="p_use_location" style="margin-top:6px;">Use my current location</button>
+        <div class="geo-status" id="p_geo_status" style="font-size:12.5px;margin-top:4px;"></div>
+      </div>
+      <button class="btn-primary" id="p_submit">Add to beat plan</button>
+    </div>
+  `);
+
+  if(myDistricts.length){
+    const sel = form.querySelector('#p_district_select');
+    const txt = form.querySelector('#p_district');
+    sel.onchange = ()=>{
+      if(sel.value === '__other'){ txt.style.display='block'; txt.value=''; txt.focus(); }
+      else { txt.style.display='none'; txt.value = sel.value; }
+    };
+    txt.value = sel.value;
+  }
+
+  form.querySelector('#p_use_location').onclick = async ()=>{
+    const status = form.querySelector('#p_geo_status');
+    status.textContent = 'Locating…';
+    try{
+      const pos = await getCurrentPosition();
+      form.querySelector('#p_lat').value = pos.lat.toFixed(6);
+      form.querySelector('#p_lng').value = pos.lng.toFixed(6);
+      status.textContent = 'Location captured.';
+    }catch(e){
+      status.textContent = "Couldn't get location — enter coordinates manually if needed.";
+    }
+  };
+
+  form.querySelector('#p_submit').onclick = async ()=>{
+    const date = form.querySelector('#p_date').value || todayStr();
+    const district = form.querySelector('#p_district').value.trim();
+    const block = form.querySelector('#p_block').value.trim();
+    const location = form.querySelector('#p_location').value.trim();
+    const address = form.querySelector('#p_address').value.trim();
+    const latVal = parseFloat(form.querySelector('#p_lat').value);
+    const lngVal = parseFloat(form.querySelector('#p_lng').value);
+    if(!district){ form.querySelector('#p_district').focus(); return; }
+    const btn = form.querySelector('#p_submit');
+    btn.disabled = true; btn.textContent = 'Adding…';
+    state.beatPlan.push({
+      id: uid(), kam: state.currentUser, date, district, block, location, address,
+      targetLat: isNaN(latVal) ? null : latVal,
+      targetLng: isNaN(lngVal) ? null : lngVal,
+      status:'planned', createdAt: Date.now()
+    });
+    await persistBeatPlan();
+    state.tab = 'today';
+    render();
+  };
+  wrap.appendChild(form);
+
+  const upcoming = state.beatPlan
+    .filter(b=> b.kam === state.currentUser && b.date >= todayStr())
+    .sort((a,b)=> a.date.localeCompare(b.date));
+  if(upcoming.length){
+    wrap.appendChild(el(`<h4 style="font-family:'Fraunces',serif;font-size:15px;margin:22px 0 10px;">Upcoming stops</h4>`));
+    const byDate = {};
+    upcoming.forEach(u=>{ (byDate[u.date] = byDate[u.date]||[]).push(u); });
+    Object.keys(byDate).sort().forEach(date=>{
+      const group = el(`<div class="day-group"><h4>${fmtDate(date)}</h4></div>`);
+      byDate[date].forEach(item=> group.appendChild(renderBeatCard(item)));
+      wrap.appendChild(group);
+    });
+  }
+  return wrap;
+}
+
+function renderMyVisits(){
+  const wrap = document.createDocumentFragment();
+  const mine = state.visitLog.filter(v=> v.kam === state.currentUser).sort((a,b)=> b.timestamp - a.timestamp);
+  if(mine.length === 0){
+    wrap.appendChild(el(`<div class="empty">No visits logged yet.</div>`));
+    return wrap;
+  }
+  const byDate = {};
+  mine.forEach(v=>{ (byDate[v.date] = byDate[v.date]||[]).push(v); });
+  Object.keys(byDate).sort().reverse().forEach(date=>{
+    const group = el(`<div class="day-group"><h4>${fmtDate(date)}</h4></div>`);
+    byDate[date].forEach(v=>{
+      group.appendChild(el(`
+        <div class="card visited">
+          <div class="card-top">
+            <div>
+              <h3>${v.district}${v.block?' — '+v.block:''}</h3>
+              <div class="sub">${v.location || ''}</div>
+            </div>
+            <span class="badge visited">${fmtTime(v.timestamp)}</span>
+          </div>
+          <div class="visit-summary">
+            <span class="k">Met:</span> ${v.entityMet} &nbsp;·&nbsp;
+            <span class="k">Application ID:</span> <span class="app-id">${v.applicationId || '—'}</span>
+            <div style="margin-top:6px;">${locationBadgeHtml(v)}</div>
+            ${v.address ? `<div style="margin-top:4px;color:var(--ink-soft);">${v.address}</div>` : ''}
+            ${v.notes ? `<div style="margin-top:4px;color:var(--ink-soft);">${v.notes}</div>` : ''}
+          </div>
+        </div>
+      `));
+    });
+    wrap.appendChild(group);
+  });
+  return wrap;
+}
+
+function renderTeamLog(){
+  const wrap = document.createDocumentFragment();
+  const today = todayStr();
+  const todayVisits = state.visitLog.filter(v=> v.date === today).sort((a,b)=> b.timestamp - a.timestamp);
+
+  const counts = {};
+  ENTITY_OPTIONS.forEach(o=> counts[o]=0);
+  todayVisits.forEach(v=>{ if(counts[v.entityMet] !== undefined) counts[v.entityMet]++; });
+  const chips = el(`<div class="entity-counts"></div>`);
+  ENTITY_OPTIONS.forEach(o=> chips.appendChild(el(`<span>${o}: ${counts[o]}</span>`)));
+  wrap.appendChild(chips);
+
+  if(todayVisits.length === 0){
+    wrap.appendChild(el(`<div class="empty">No visits logged by the team yet today.</div>`));
+    return wrap;
+  }
+
+  const table = el(`
+    <table class="team-table">
+      <thead><tr><th>Sales exec</th><th>District</th><th>Met</th><th>Application ID</th><th>Distance</th><th>Time</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  `);
+  const tbody = table.querySelector('tbody');
+  todayVisits.forEach(v=>{
+    if(state.editVisitId === v.id){
+      tbody.appendChild(renderVisitEditRow(v));
+      return;
+    }
+    const row = el(`
+      <tr>
+        <td>${v.kam}</td>
+        <td>${v.district}${v.block?' — '+v.block:''}</td>
+        <td>${v.entityMet}</td>
+        <td style="font-family:'IBM Plex Mono',monospace;">${v.applicationId || '—'}</td>
+        <td>${locationBadgeHtml(v)}</td>
+        <td>${fmtTime(v.timestamp)}</td>
+        <td></td>
+      </tr>
+    `);
+    const actionsCell = row.lastElementChild;
+    const editBtn = el(`<button class="btn-ghost" style="padding:5px 10px;font-size:12.5px;margin-right:6px;">Edit</button>`);
+    editBtn.onclick = ()=>{ state.editVisitId = v.id; render(); };
+    const delBtn = el(`<button class="btn-ghost" style="padding:5px 10px;font-size:12.5px;color:var(--rust);border-color:var(--rust);">Delete</button>`);
+    delBtn.onclick = async ()=>{
+      if(!confirm(`Delete this visit by ${v.kam} (${v.district}${v.block?' — '+v.block:''})? This can't be undone.`)) return;
+      state.visitLog = state.visitLog.filter(x=> x.id !== v.id);
+      await persistVisitLog();
+      render();
+    };
+    actionsCell.appendChild(editBtn);
+    actionsCell.appendChild(delBtn);
+    tbody.appendChild(row);
+  });
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function renderVisitEditRow(v){
+  const row = el(`
+    <tr>
+      <td>${v.kam}</td>
+      <td>${v.district}${v.block?' — '+v.block:''}</td>
+      <td></td>
+      <td></td>
+      <td>${locationBadgeHtml(v)}</td>
+      <td>${fmtTime(v.timestamp)}</td>
+      <td></td>
+    </tr>
+  `);
+  const cells = row.children;
+  const entitySelect = el(`
+    <select style="font-size:13px;padding:4px 6px;">
+      ${ENTITY_OPTIONS.map(o=>`<option value="${o}" ${o===v.entityMet?'selected':''}>${o}</option>`).join('')}
+    </select>
+  `);
+  cells[2].appendChild(entitySelect);
+  const appIdInput = el(`<input type="text" value="${v.applicationId || ''}" style="font-family:'IBM Plex Mono',monospace;font-size:13px;padding:4px 6px;width:100%;">`);
+  cells[3].appendChild(appIdInput);
+
+  const saveBtn = el(`<button class="btn-primary" style="padding:5px 10px;font-size:12.5px;margin-right:6px;">Save</button>`);
+  const cancelBtn = el(`<button class="btn-ghost" style="padding:5px 10px;font-size:12.5px;">Cancel</button>`);
+  saveBtn.onclick = async ()=>{
+    const idx = state.visitLog.findIndex(x=> x.id === v.id);
+    if(idx > -1){
+      state.visitLog[idx].entityMet = entitySelect.value;
+      state.visitLog[idx].applicationId = appIdInput.value.trim();
+    }
+    state.editVisitId = null;
+    await persistVisitLog();
+    render();
+  };
+  cancelBtn.onclick = ()=>{ state.editVisitId = null; render(); };
+  cells[6].appendChild(saveBtn);
+  cells[6].appendChild(cancelBtn);
+  return row;
+}
+
+function renderAppIds(){
+  const wrap = document.createDocumentFragment();
+  const selectedDate = state.appIdsDate || todayStr();
+
+  const filterBar = el(`
+    <div class="filter-bar">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="aid_date" value="${selectedDate}">
+      </div>
+    </div>
+  `);
+  filterBar.querySelector('#aid_date').onchange = (e)=>{
+    state.appIdsDate = e.target.value || todayStr();
+    render();
+  };
+  wrap.appendChild(filterBar);
+
+  const dayVisits = state.visitLog.filter(v=> v.kam === state.currentUser && v.date === selectedDate && v.applicationId && v.applicationId.trim());
+
+  wrap.appendChild(el(`
+    <div class="big-count">
+      <div class="n">${dayVisits.length}</div>
+      <div class="l">application ID${dayVisits.length===1?'':'s'} filled on ${fmtDate(selectedDate)}</div>
+    </div>
+  `));
+
+  if(dayVisits.length){
+    dayVisits.sort((a,b)=> b.timestamp - a.timestamp).forEach(v=>{
+      wrap.appendChild(el(`
+        <div class="card visited">
+          <div class="card-top">
+            <div>
+              <h3>${v.district}${v.block?' — '+v.block:''}</h3>
+              <div class="sub">${v.location || ''}</div>
+            </div>
+            <span class="badge visited">${fmtTime(v.timestamp)}</span>
+          </div>
+          <div class="visit-summary">
+            <span class="k">Met:</span> ${v.entityMet} &nbsp;·&nbsp;
+            <span class="k">Application ID:</span> <span class="app-id">${v.applicationId}</span>
+            <div style="margin-top:6px;">${locationBadgeHtml(v)}</div>
+          </div>
+        </div>
+      `));
+    });
+  } else {
+    wrap.appendChild(el(`<div class="empty">No application IDs filled on this date yet.</div>`));
+  }
+
+  const mineWithId = state.visitLog.filter(v=> v.kam === state.currentUser && v.applicationId && v.applicationId.trim());
+  const byDate = {};
+  mineWithId.forEach(v=>{ byDate[v.date] = (byDate[v.date]||0) + 1; });
+  const dates = Object.keys(byDate).sort().reverse();
+  if(dates.length){
+    const dayTable = el(`
+      <table class="day-count-table">
+        <thead><tr><th>Date</th><th class="num">Application IDs filled</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    `);
+    const tbody = dayTable.querySelector('tbody');
+    dates.forEach(d=>{
+      tbody.appendChild(el(`<tr><td>${fmtDate(d)}</td><td class="num">${byDate[d]}</td></tr>`));
+    });
+    wrap.appendChild(el(`<h4 style="font-family:'Fraunces',serif;font-size:15px;margin:22px 0 4px;">Your day-wise history</h4>`));
+    wrap.appendChild(dayTable);
+  }
+  return wrap;
+}
+
+function downloadCsv(filename, rows){
+  const csv = rows.map(r=> r.map(cell=>{
+    const s = String(cell ?? '');
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  }).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderAdminReport(){
+  const wrap = document.createDocumentFragment();
+  const from = state.adminFrom || todayStr();
+  const to = state.adminTo || todayStr();
+
+  const filterBar = el(`
+    <div class="filter-bar">
+      <div class="field">
+        <label>From</label>
+        <input type="date" id="adm_from" value="${from}">
+      </div>
+      <div class="field">
+        <label>To</label>
+        <input type="date" id="adm_to" value="${to}">
+      </div>
+    </div>
+  `);
+  filterBar.querySelector('#adm_from').onchange = (e)=>{ state.adminFrom = e.target.value || todayStr(); render(); };
+  filterBar.querySelector('#adm_to').onchange = (e)=>{ state.adminTo = e.target.value || todayStr(); render(); };
+  wrap.appendChild(filterBar);
+
+  const inRange = state.visitLog.filter(v=> v.date >= from && v.date <= to);
+
+  const perKam = {};
+  state.team.forEach(name=> perKam[name] = { visits:0, appIds:0, offsite:0, entities:{} });
+  inRange.forEach(v=>{
+    if(!perKam[v.kam]) perKam[v.kam] = { visits:0, appIds:0, offsite:0, entities:{} };
+    perKam[v.kam].visits++;
+    if(v.applicationId && v.applicationId.trim()) perKam[v.kam].appIds++;
+    if(v.locationStatus === 'offsite') perKam[v.kam].offsite++;
+    perKam[v.kam].entities[v.entityMet] = (perKam[v.kam].entities[v.entityMet]||0) + 1;
+  });
+
+  const totals = { visits:0, appIds:0, offsite:0 };
+  Object.values(perKam).forEach(k=>{ totals.visits += k.visits; totals.appIds += k.appIds; totals.offsite += k.offsite; });
+
+  wrap.appendChild(el(`
+    <div class="stat-strip">
+      <div class="stat"><div class="n">${totals.visits}</div><div class="l">Total visits, all KAMs</div></div>
+      <div class="stat"><div class="n">${totals.appIds}</div><div class="l">Total application IDs filled</div></div>
+      <div class="stat"><div class="n">${totals.offsite}</div><div class="l">Flagged off-location visits</div></div>
+    </div>
+  `));
+
+  const actions = el(`<div class="report-actions"><button class="btn-ghost" id="adm_export">Export CSV</button></div>`);
+  wrap.appendChild(actions);
+
+  const table = el(`
+    <table class="team-table">
+      <thead>
+        <tr>
+          <th>KAM</th><th class="num">Visits</th><th class="num">App IDs filled</th><th class="num">Off-location</th>
+          ${ENTITY_OPTIONS.map(o=>`<th class="num">${o}</th>`).join('')}
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  `);
+  const tbody = table.querySelector('tbody');
+  Object.keys(perKam).sort().forEach(name=>{
+    const k = perKam[name];
+    tbody.appendChild(el(`
+      <tr>
+        <td>${name}</td>
+        <td class="num">${k.visits}</td>
+        <td class="num">${k.appIds}</td>
+        <td class="num">${k.offsite}</td>
+        ${ENTITY_OPTIONS.map(o=>`<td class="num">${k.entities[o]||0}</td>`).join('')}
+      </tr>
+    `));
+  });
+  tbody.appendChild(el(`
+    <tr class="totals">
+      <td>All KAMs</td>
+      <td class="num">${totals.visits}</td>
+      <td class="num">${totals.appIds}</td>
+      <td class="num">${totals.offsite}</td>
+      ${ENTITY_OPTIONS.map(o=>{
+        const sum = Object.values(perKam).reduce((s,k)=> s + (k.entities[o]||0), 0);
+        return `<td class="num">${sum}</td>`;
+      }).join('')}
+    </tr>
+  `));
+  wrap.appendChild(table);
+
+  actions.querySelector('#adm_export').onclick = ()=>{
+    const header = ['KAM','Visits','Application IDs filled','Off-location visits', ...ENTITY_OPTIONS];
+    const rows = [header];
+    Object.keys(perKam).sort().forEach(name=>{
+      const k = perKam[name];
+      rows.push([name, k.visits, k.appIds, k.offsite, ...ENTITY_OPTIONS.map(o=> k.entities[o]||0)]);
+    });
+    rows.push(['All KAMs', totals.visits, totals.appIds, totals.offsite, ...ENTITY_OPTIONS.map(o=>{
+      return Object.values(perKam).reduce((s,k)=> s + (k.entities[o]||0), 0);
+    })]);
+    downloadCsv(`beat-register-report_${from}_to_${to}.csv`, rows);
+  };
+
+  return wrap;
+}
+
+init();
+</script>
+</body>
+</html>
