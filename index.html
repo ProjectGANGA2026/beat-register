@@ -389,7 +389,10 @@ async function loadAppData(user){
   if(userDoc && userDoc.name){
     state.currentUser = userDoc.name;
     state.role = userDoc.role === 'admin' ? 'admin' : 'kam';
-    if((state.tab === 'admin' || state.tab === 'team') && state.role !== 'admin'){ state.tab = 'today'; }
+    const adminTabs = ['admin','team'];
+    const kamTabs = ['today','plan','appids','mine'];
+    if(state.role === 'admin' && !adminTabs.includes(state.tab)){ state.tab = 'admin'; }
+    if(state.role !== 'admin' && !kamTabs.includes(state.tab)){ state.tab = 'today'; }
     if(!state.team.includes(state.currentUser)){
       state.team.push(state.currentUser);
       await persistTeam();
@@ -544,16 +547,14 @@ function renderHeader(){
 }
 
 function renderTabs(){
-  const tabs = [
-    {id:'today', label:"Today's beat"},
-    {id:'plan', label:'Plan ahead'},
-    {id:'appids', label:'App IDs'},
-    {id:'mine', label:'My visits'}
-  ];
-  if(state.role === 'admin'){
-    tabs.push({id:'team', label:'Team log'});
-    tabs.push({id:'admin', label:'Admin report'});
-  }
+  const tabs = state.role === 'admin'
+    ? [ {id:'team', label:'Team log'}, {id:'admin', label:'Admin report'} ]
+    : [
+        {id:'today', label:"Today's beat"},
+        {id:'plan', label:'Plan ahead'},
+        {id:'appids', label:'App IDs'},
+        {id:'mine', label:'My visits'}
+      ];
   const nav = el(`<nav class="tabs"></nav>`);
   tabs.forEach(t=>{
     const b = el(`<button class="${state.tab===t.id?'active':''}">${t.label}</button>`);
@@ -940,7 +941,16 @@ function renderTeamLog(){
     delBtn.onclick = async ()=>{
       if(!confirm(`Delete this visit by ${v.kam} (${v.district}${v.block?' — '+v.block:''})? This can't be undone.`)) return;
       state.visitLog = state.visitLog.filter(x=> x.id !== v.id);
+      let planChanged = false;
+      state.beatPlan.forEach(item=>{
+        if(item.visitId === v.id){
+          item.status = 'planned';
+          item.visitId = null;
+          planChanged = true;
+        }
+      });
       await persistVisitLog();
+      if(planChanged){ await persistBeatPlan(); }
       render();
     };
     actionsCell.appendChild(editBtn);
@@ -1076,6 +1086,29 @@ function downloadCsv(filename, rows){
   URL.revokeObjectURL(url);
 }
 
+function renderBarChart(title, data, colorVar){
+  // data: [{label, value}], sorted by caller if order matters
+  const max = Math.max(1, ...data.map(d=> d.value));
+  const wrap = el(`<div style="margin-bottom:22px;"></div>`);
+  wrap.appendChild(el(`<h4 style="font-family:'Fraunces',serif;font-size:15px;margin:0 0 10px;">${title}</h4>`));
+  const chart = el(`<div style="display:flex;flex-direction:column;gap:8px;"></div>`);
+  data.forEach(d=>{
+    const pct = Math.round((d.value / max) * 100);
+    const row = el(`
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:130px;flex-shrink:0;font-size:12.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.label}</div>
+        <div style="flex:1;background:var(--line);border-radius:3px;height:18px;position:relative;">
+          <div style="width:${pct}%;background:${colorVar};height:100%;border-radius:3px;min-width:${d.value>0?'3px':'0'};"></div>
+        </div>
+        <div style="width:28px;flex-shrink:0;font-size:12.5px;font-weight:600;text-align:right;">${d.value}</div>
+      </div>
+    `);
+    chart.appendChild(row);
+  });
+  wrap.appendChild(chart);
+  return wrap;
+}
+
 function renderAdminReport(){
   const wrap = document.createDocumentFragment();
   const from = state.adminFrom || todayStr();
@@ -1119,6 +1152,24 @@ function renderAdminReport(){
       <div class="stat"><div class="n">${totals.offsite}</div><div class="l">Flagged off-location visits</div></div>
     </div>
   `));
+
+  const visitsByKam = Object.keys(perKam).sort((a,b)=> perKam[b].visits - perKam[a].visits)
+    .map(name=> ({ label: name, value: perKam[name].visits }));
+  wrap.appendChild(renderBarChart('Visits by KAM', visitsByKam, 'var(--indigo)'));
+
+  const entityTotals = {};
+  ENTITY_OPTIONS.forEach(o=> entityTotals[o] = 0);
+  Object.values(perKam).forEach(k=>{
+    ENTITY_OPTIONS.forEach(o=> entityTotals[o] += (k.entities[o] || 0));
+  });
+  const entityData = ENTITY_OPTIONS.map(o=> ({ label: o, value: entityTotals[o] }));
+  wrap.appendChild(renderBarChart('Meetings by entity type', entityData, 'var(--green)'));
+
+  const offsiteByKam = Object.keys(perKam).sort((a,b)=> perKam[b].offsite - perKam[a].offsite)
+    .map(name=> ({ label: name, value: perKam[name].offsite }));
+  if(totals.offsite > 0){
+    wrap.appendChild(renderBarChart('Off-location visits by KAM', offsiteByKam, 'var(--rust)'));
+  }
 
   const actions = el(`<div class="report-actions"><button class="btn-ghost" id="adm_export">Export CSV</button></div>`);
   wrap.appendChild(actions);
