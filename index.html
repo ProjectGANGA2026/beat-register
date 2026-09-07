@@ -393,7 +393,7 @@ async function loadAppData(user){
     const kamTabs = ['today','plan','appids','mine'];
     if(state.role === 'admin' && !adminTabs.includes(state.tab)){ state.tab = 'admin'; }
     if(state.role !== 'admin' && !kamTabs.includes(state.tab)){ state.tab = 'today'; }
-    if(!state.team.includes(state.currentUser)){
+    if(state.role !== 'admin' && !state.team.includes(state.currentUser)){
       state.team.push(state.currentUser);
       await persistTeam();
     }
